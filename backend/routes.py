@@ -1,11 +1,13 @@
 from flask_restful import Resource
 from flask import request
-from bson.objectid import ObjectId  # Para lidar com IDs do MongoDB
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from bson.objectid import ObjectId
 
 class MovieList(Resource):
     def __init__(self, db):
         self.db = db
 
+    @jwt_required()
     def get(self):
         """Lista todos os filmes no banco de dados."""
         movies = self.db.movies.find()
@@ -19,6 +21,7 @@ class MovieList(Resource):
             for movie in movies
         ], 200
 
+    @jwt_required()
     def post(self):
         """Adiciona um novo filme ao banco de dados."""
         data = request.json
@@ -29,6 +32,7 @@ class MovieDetail(Resource):
     def __init__(self, db):
         self.db = db
 
+    @jwt_required()
     def put(self, movie_id):
         """Atualiza um filme existente pelo ID."""
         data = request.json
@@ -37,6 +41,7 @@ class MovieDetail(Resource):
             return {"message": "Filme atualizado com sucesso!"}, 200
         return {"message": "Nenhuma alteração foi realizada."}, 404
 
+    @jwt_required()
     def delete(self, movie_id):
         """Exclui um filme pelo ID."""
         result = self.db.movies.delete_one({"_id": ObjectId(movie_id)})
